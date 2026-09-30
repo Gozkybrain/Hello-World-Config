@@ -103,7 +103,7 @@ export default function JobDetail() {
   if (job.loading) {
     return (
       <main className="hw-main">
-        <Loading label="Loading role" />
+        <Loading />
       </main>
     );
   }

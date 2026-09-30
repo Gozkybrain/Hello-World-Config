@@ -11,7 +11,7 @@ export default function Roadmaps() {
   if (me.loading) {
     return (
       <main className="hw-main">
-        <Loading label="Loading your roadmaps" />
+        <Loading />
       </main>
     );
   }

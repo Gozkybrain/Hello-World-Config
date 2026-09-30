@@ -8,7 +8,7 @@ export default function Overview() {
   const me = useApi("/api/me");
   const engines = useApi("/api/engines");
 
-  if (me.loading) return <Loading label="Checking your key" />;
+  if (me.loading) return <Loading />;
 
   if (me.error) {
     if (me.error.code === "no_key") {

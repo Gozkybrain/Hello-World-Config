@@ -1,5 +1,7 @@
 "use client";
 
+import Loader from "@/components/Loader";
+
 export function KeyMissing({ error }) {
   return (
     <div className="hw-state hw-state--error">
@@ -22,14 +24,9 @@ export function KeyMissing({ error }) {
   );
 }
 
-export function Loading({ label = "Loading" }) {
-  return (
-    <div className="hw-state">
-      <span className="hw-spin" /> <span style={{ marginLeft: 8 }}>{label}</span>
-    </div>
-  );
+export function Loading() {
+  return <Loader />;
 }
-
 export function ErrorState({ error, onRetry }) {
   return (
     <div className="hw-state hw-state--error">

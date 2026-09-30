@@ -1,0 +1,238 @@
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999999999;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  pointer-events: auto;
+}
+
+.loader-overlay.loader-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Background effect layer */
+.bg-effect {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-effect .gradient-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg,
+      color-mix(in srgb, var(--globe-accent) 2%, var(--bg)),
+      color-mix(in srgb, var(--globe-accent) 4%, var(--bg)),
+      color-mix(in srgb, var(--globe-accent) 3%, var(--bg)),
+      color-mix(in srgb, var(--globe-accent) 5%, var(--bg)),
+      color-mix(in srgb, var(--globe-accent) 2%, var(--bg)));
+  background-size: 600% 600%;
+  animation: gradient-shift 20s ease infinite;
+  pointer-events: none;
+}
+
+.bg-effect .grid-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  background-image: linear-gradient(color-mix(in srgb, var(--globe-accent) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--globe-accent) 7%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 25px 25px, color-mix(in srgb, var(--globe-accent) 10%, transparent) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 50px 50px;
+  animation: circuit-pulse 15s ease infinite;
+  pointer-events: none;
+}
+
+.bg-effect .floating-shapes {
+  pointer-events: none;
+}
+
+.bg-effect .shape {
+  position: absolute;
+  border-radius: 7px;
+  opacity: 0.6;
+}
+
+.bg-effect .shape-1 {
+  width: 60px;
+  height: 60px;
+  top: 15%;
+  left: 10%;
+  border: 1px solid color-mix(in srgb, var(--globe-accent) 10%, transparent);
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-effect .shape-2 {
+  width: 40px;
+  height: 40px;
+  top: 25%;
+  right: 15%;
+  border: 1px solid color-mix(in srgb, var(--globe-accent) 13%, transparent);
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-effect .shape-3 {
+  width: 80px;
+  height: 80px;
+  bottom: 20%;
+  left: 20%;
+  background: color-mix(in srgb, var(--globe-accent) 8%, transparent);
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-effect .shape-4 {
+  width: 50px;
+  height: 50px;
+  bottom: 30%;
+  right: 25%;
+  background: linear-gradient(45deg,
+      color-mix(in srgb, var(--globe-accent) 11%, transparent),
+      color-mix(in srgb, var(--globe-accent) 8%, transparent));
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-effect .shape-5 {
+  width: 70px;
+  height: 70px;
+  top: 50%;
+  left: 50%;
+  background: linear-gradient(45deg,
+      color-mix(in srgb, var(--globe-accent) 6%, transparent),
+      color-mix(in srgb, var(--globe-accent) 9%, transparent));
+  border: 2px solid color-mix(in srgb, var(--globe-accent) 12%, transparent);
+  animation: float 8s ease-in-out infinite, morph 12s ease-in-out infinite;
+}
+
+.loader-box {
+  background: var(--surface);
+  border-radius: 7px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 0 5px var(--ring);
+  font-family: monospace;
+  color: var(--text-muted);
+  overflow: hidden;
+}
+
+.loader-header {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.dot.red {
+  background: #ff5f56;
+}
+.dot.yellow {
+  background: #ffbd2e;
+}
+.dot.green {
+  background: #27c93f;
+}
+
+.loader-content {
+  padding: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.prompt {
+  color: var(--text-muted);
+}
+
+.text {
+  margin-left: 5px;
+  font-size: 14px;
+}
+
+.cursor {
+  margin-left: 5px;
+  color: var(--text-muted);
+  animation: blink 1s steps(1, start) infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+
+.terminal-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-link {
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  font-family: monospace;
+  transition: color 0.2s ease;
+}
+
+.action-link:hover {
+  color: var(--text);
+}
+
+.divider {
+  color: var(--text-faint);
+  font-family: monospace;
+}
+
+/* ===== Background effect keyframes ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  33% { transform: translateY(-15px) rotate(3deg) scale(1.02); }
+  66% { transform: translateY(-8px) rotate(-2deg) scale(0.98); }
+}
+
+@keyframes morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg) scale(1); }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(90deg) scale(1.1); }
+  50% { border-radius: 70% 30% 40% 60% / 40% 70% 60% 30%; transform: rotate(180deg) scale(0.9); }
+  75% { border-radius: 40% 70% 60% 30% / 70% 40% 30% 60%; transform: rotate(270deg) scale(1.05); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes circuit-pulse {
+  0%, 100% { background-position: 0% 0%; opacity: 0.3; }
+  50% { background-position: 100% 100%; opacity: 0.8; }
+}

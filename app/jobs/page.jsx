@@ -73,7 +73,7 @@ export default function Jobs() {
 
       {error && <ErrorState error={error} onRetry={reload} />}
 
-      {loading && <Loading label="Loading jobs" />}
+      {loading && <Loading />}
 
       {!loading && !error && jobs.length === 0 && (
         <Empty title="No jobs matched">
