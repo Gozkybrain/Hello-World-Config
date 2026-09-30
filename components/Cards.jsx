@@ -62,15 +62,17 @@ export function JobCard({ job }) {
 }
 
 export function StartupCard({ startup }) {
-  return (
-    <div className="hw-item" style={{ cursor: "default" }}>
+  const jobs = Number(startup.jobsCount) || 0;
+  const href = startup.key ? `/startups/${encodeURIComponent(startup.key)}` : null;
+
+  const inner = (
+    <>
       <div className="hw-item-top">
         <Avatar src={startup.icon} name={startup.name} />
         <div style={{ minWidth: 0 }}>
           <p className="hw-item-title">{startup.name || "Unnamed"}</p>
           <p className="hw-item-sub">
-            {startup.jobsCount || 0} open{" "}
-            {(startup.jobsCount || 0) === 1 ? "role" : "roles"}
+            {jobs} open {jobs === 1 ? "role" : "roles"}
             {startup.oneLiner ? ` · ${startup.oneLiner}` : ""}
           </p>
         </div>
@@ -85,6 +87,16 @@ export function StartupCard({ startup }) {
           ))}
         </div>
       )}
-    </div>
+    </>
+  );
+
+  if (!href) {
+    return <div className="hw-item" style={{ cursor: "default" }}>{inner}</div>;
+  }
+
+  return (
+    <Link href={href} className="hw-item">
+      {inner}
+    </Link>
   );
 }

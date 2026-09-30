@@ -5,27 +5,41 @@ import { useApi } from "@/lib/useApi";
 import { StartupCard } from "@/components/Cards";
 import { Empty, ErrorState, KeyMissing, Loading } from "@/components/States";
 
-const MAX_LIMIT = 50;
+function resetWhen(refreshAt) {
+  if (!refreshAt) return null;
+  const at = new Date(Number(refreshAt));
+  if (Number.isNaN(at.getTime())) return null;
+
+  const date = at.toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const time = at.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${date} at ${time}`;
+}
+
+function resetIn(refreshAt, now) {
+  const ms = Number(refreshAt) - now;
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
 
 export default function Startups() {
-  const [search, setSearch] = useState("");
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("new");
-  const [limit, setLimit] = useState(30);
+  const { data, error, loading, reload } = useApi("/api/startups");
+  const [now, setNow] = useState(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setQuery(search.trim()), 300);
-    return () => clearTimeout(t);
-  }, [search]);
-
-  useEffect(() => {
-    setLimit(30);
-  }, [query, sort]);
-
-  const params = new URLSearchParams({ limit: String(limit), sort });
-  if (query) params.set("search", query);
-
-  const { data, error, loading, reload } = useApi(`/api/startups?${params}`);
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
 
   if (error?.code === "no_key") {
     return (
@@ -37,39 +51,26 @@ export default function Startups() {
   }
 
   const startups = data?.startups || [];
+  const mapped = data && data.dailyLimit;
+  const when = resetWhen(data?.refreshAt);
+  const countdown = now ? resetIn(data?.refreshAt, now) : null;
 
   return (
     <main className="hw-main">
       <h1 className="hw-title">Startups</h1>
       <p className="hw-sub">
-        Companies hiring through Hello World right now, with how many roles each
-        one has open.
+        {mapped && when
+          ? `These are your startup recommendations for today. Your next set arrives ${when}${countdown ? ` (in ${countdown})` : ""}.`
+          : "Companies hiring through Hello World right now."}
       </p>
-
-      <div className="hw-bar">
-        <input
-          className="hw-input"
-          placeholder="Search companies"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="hw-select"
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-        >
-          <option value="new">Newest first</option>
-          <option value="random">Shuffled</option>
-        </select>
-      </div>
 
       {error && <ErrorState error={error} onRetry={reload} />}
 
       {loading && <Loading />}
 
       {!loading && !error && startups.length === 0 && (
-        <Empty title="No startups matched">
-          <p>Try a different search.</p>
+        <Empty title="No startups available">
+          <p>Nothing is active right now.</p>
         </Empty>
       )}
 
@@ -83,33 +84,8 @@ export default function Startups() {
 
           <div className="hw-pager">
             <span className="hw-pager-count">
-              Showing {startups.length} of {data?.total || startups.length}{" "}
-              companies tracked
+              {startups.length} recommended for today
             </span>
-
-            {sort === "new" ? (
-              startups.length < Math.min(data?.total || 0, MAX_LIMIT) ? (
-                <button
-                  className="hw-btn"
-                  onClick={() =>
-                    setLimit((n) => Math.min(n + 20, MAX_LIMIT))
-                  }
-                  disabled={loading}
-                >
-                  Load 20 more
-                </button>
-              ) : (data?.total || 0) > MAX_LIMIT ? (
-                <span className="hw-pager-note">
-                  The API returns at most {MAX_LIMIT} at a time. Search to reach
-                  the other {(data?.total || 0) - MAX_LIMIT}.
-                </span>
-              ) : null
-            ) : (
-              <span className="hw-pager-note">
-                Shuffled view shows a random set. Switch to Newest first to page
-                through everything.
-              </span>
-            )}
           </div>
         </>
       )}
