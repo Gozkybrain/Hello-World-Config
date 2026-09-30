@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["name", "api"],
+  "properties": {
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "api": {
+      "type": "object",
+      "required": ["keyEnv", "defaultBase"],
+      "properties": {
+        "keyEnv": { "type": "string", "description": "Environment variable holding the Agent API Key." },
+        "baseEnv": { "type": "string", "description": "Optional environment variable overriding the API base." },
+        "defaultBase": { "type": "string", "format": "uri" },
+        "stripTrailingSlash": { "type": "boolean" }
+      }
+    },
+    "port": { "type": "integer" },
+    "providers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "base": { "type": ["string", "null"] },
+          "models": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

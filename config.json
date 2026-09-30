@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Gozkybrain/Hello-World-Config/main/config.schema.json",
+  "name": "hello-world-config",
+  "version": "0.1.0",
+  "api": {
+    "keyEnv": "SGK",
+    "baseEnv": "HW_API_BASE",
+    "defaultBase": "https://helloworldjobs.net",
+    "stripTrailingSlash": true
+  },
+  "port": 2026,
+  "providers": {
+    "openrouter": {
+      "base": "https://openrouter.ai/api/v1",
+      "models": [
+        "openrouter/free",
+        "google/gemma-4-31b-it:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "qwen/qwen3-next-80b-a3b-instruct:free",
+        "openai/gpt-oss-20b:free",
+        "deepseek/deepseek-r1:free",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "qwen/qwq-32b:free",
+        "mistralai/mistral-7b-instruct:free"
+      ]
+    },
+    "ollama": {
+      "base": "http://localhost:11434/v1",
+      "models": ["llama3", "llama3.1", "gemma2", "mistral"]
+    },
+    "omnirouter": {
+      "models": ["auto"]
+    }
+  },
+  "notes": "Read SGK from the environment (a .env file in this folder). Never copy the key into this file."
+}
