@@ -70,7 +70,7 @@ Open the address and check, in order:
 | Engine count is 0 | No model connected | Connect OpenRouter or Ollama on the setup page |
 | Could not reach the API | The deployment is down, or `HW_API_BASE` points somewhere wrong | Check the variable; unset it to use the public deployment |
 | Port 2026 already in use | Another process holds the port | Stop the other process, or run on a different port |
-| Jobs load, generation fails | Engine cannot serve the request | Check `/v1/me/ai` and reconnect the engine |
+| Jobs load, generation fails | Engine cannot serve the request | Check `/api/v1/me/ai` and reconnect the engine |
 
 ## What to tell the user
 

@@ -2,50 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_ICONS, NAV_LINKS } from "@/lib/nav";
 
-const NAV_LINKS = [
-  {
-    href: "/",
-    label: "Overview",
-    icon: (
-      <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-    ),
-  },
-  {
-    href: "/jobs",
-    label: "Jobs",
-    icon: (
-      <>
-        <rect x="2" y="7" width="20" height="14" rx="2" />
-        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-      </>
-    ),
-  },
-  {
-    href: "/startups",
-    label: "Startups",
-    icon: (
-      <>
-        <path d="M3 21h18" />
-        <path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16" />
-        <path d="M15 9h2a2 2 0 0 1 2 2v10" />
-        <path d="M9 7h2M9 11h2M9 15h2" />
-      </>
-    ),
-  },
-  {
-    href: "/roadmaps",
-    label: "Roadmaps",
-    icon: (
-      <>
-        <path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z" />
-        <path d="M9 4v14M15 6v14" />
-      </>
-    ),
-  },
-];
-
-export default function MobileMenu({ open, onClose }) {
+export default function MobileMenu({ open, onClose, counts = {} }) {
   const pathname = usePathname();
 
   if (!open) return null;
@@ -67,12 +26,14 @@ export default function MobileMenu({ open, onClose }) {
           {NAV_LINKS.map(({ href, label, icon }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
+            const count = counts[href];
             return (
               <Link
                 key={href}
                 className={`sidebar-link${isActive ? " active" : ""}`}
                 href={href}
                 onClick={onClose}
+                aria-current={isActive ? "page" : undefined}
               >
                 <svg
                   className="sidebar-icon"
@@ -82,10 +43,13 @@ export default function MobileMenu({ open, onClose }) {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
                 >
-                  {icon}
+                  {NAV_ICONS[icon] || icon}
                 </svg>
-                {label}
+                <span>{label}</span>
+                {count != null && <span className="sidebar-count">{count}</span>}
               </Link>
             );
           })}

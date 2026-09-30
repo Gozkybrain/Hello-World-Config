@@ -1,6 +1,6 @@
 import { Oswald } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -27,8 +27,8 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        <Header />
-        {children}
+        <Sidebar />
+        <div className="hw-shell">{children}</div>
       </body>
     </html>
   );

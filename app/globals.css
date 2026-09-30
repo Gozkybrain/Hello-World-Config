@@ -61,6 +61,13 @@
 
   /* ---- panel-specific ---- */
   --header-h: 90px;
+  --sidebar-w: 250px;
+  --topbar-h: 80px;
+  --topbar-logo-h: 56px;
+  --sidebar-bg: #000000;
+  --sidebar-fg: #ffffff;
+  --sidebar-muted: var(--zinc-400);
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
   --radius: 10px;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --overlay-tint: rgba(9, 9, 11, 0.85);
@@ -114,6 +121,11 @@ html[data-theme="light"] {
 
   --overlay-tint: rgba(250, 250, 250, 0.85);
   --code-bg: #f4f4f5;
+
+  --sidebar-bg: #ffffff;
+  --sidebar-fg: #000000;
+  --sidebar-muted: var(--zinc-600);
+  --sidebar-hover: rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -148,43 +160,174 @@ pre {
   font-family: var(--mono);
 }
 
-/* ---------- header (ported from hello-world-jobs styles/user-nav.css) ---------- */
+/* ---------- desktop sidebar (ported from hello-world-jobs styles/Sidebar.css) ---------- */
 
-.head-user {
+.sidebar-desktop {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+  height: calc(100vh - var(--topbar-h));
+  padding: 20px;
+  position: fixed;
+  left: 0;
+  top: var(--topbar-h);
+  z-index: 90;
+  display: none;
+  flex-direction: column;
+  box-shadow: -4px 0 6px -2px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-desktop::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.sidebar-nav {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-link {
+  display: flex;
   align-items: center;
-  padding: 12px 16px;
   gap: 12px;
+  margin: 2px 0;
+  padding: 11px 12px;
+  border-radius: 7px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.sidebar-count {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--ring);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.sidebar-link:hover {
+  background: var(--ring);
+  color: var(--text);
+}
+
+.sidebar-link.active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.sidebar-link.active .sidebar-icon {
+  color: var(--bg) !important;
+}
+
+.sidebar-link.active .sidebar-count {
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--bg);
+}
+
+.sidebar-link.active:hover {
+  color: var(--bg);
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 7px;
+  color: var(--sidebar-fg);
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.sidebar-user:hover {
+  background: var(--sidebar-hover);
+}
+
+.sidebar-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.sidebar-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-handle {
+  font-size: 12px;
+  color: var(--sidebar-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-foot-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0 10px;
+}
+
+/* ---------- top bar (both viewports) ---------- */
+
+.hw-topbar {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--topbar-h);
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 80;
 }
 
-.header-logo-wrapper {
-  display: flex;
-  align-items: center;
-  margin-right: auto;
-  text-decoration: none;
-}
-
-.header-logo {
-  height: 65px;
+.hw-topbar-logo {
+  height: var(--topbar-logo-h);
   width: auto;
   object-fit: contain;
 }
 
-.header-brand {
+.hw-topbar-brand {
   display: flex;
   flex-direction: column;
   line-height: 1.05;
-}
-
-.header-brand-line {
   font-family: var(--font-oswald), "Asap Condensed", sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -195,46 +338,15 @@ pre {
   color: transparent;
 }
 
-.header-actions {
+.hw-topbar-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
 }
 
-.header-links {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-right: 28px;
-}
-
-.header-link {
-  position: relative;
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 600;
-  white-space: nowrap;
-  transition: color 0.15s ease;
-}
-
-.header-link:hover {
-  color: var(--text);
-  text-decoration: none;
-}
-
-.header-link--active {
-  color: var(--text);
-}
-
-.header-link--active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -6px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
+.hw-shell {
+  min-height: 100vh;
 }
 
 .hamburger {
@@ -361,6 +473,20 @@ pre {
   background: var(--text);
 }
 
+.sidebar-mobile .sidebar-link.active .sidebar-icon {
+  color: var(--bg);
+}
+
+.sidebar-mobile .sidebar-count {
+  background: var(--ring);
+  color: var(--text);
+}
+
+.sidebar-mobile .sidebar-link.active .sidebar-count {
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--bg);
+}
+
 .sidebar-mobile .sidebar-link .sidebar-icon {
   width: 20px;
   height: 20px;
@@ -376,25 +502,30 @@ pre {
 .theme-toggle {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   padding: 0;
   border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--text-faint);
   background: var(--surface);
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 .theme-toggle:hover {
   color: var(--text);
-  border-color: var(--text-faint);
+  border-color: var(--text);
 }
 
 /* ---------- shell ---------- */
 
+.hw-shell {
+  margin-left: var(--sidebar-w);
+}
+
 .hw-main {
-  padding: calc(var(--header-h) + 28px) 20px 64px;
+  padding: 28px 20px 64px;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -808,29 +939,36 @@ details > *:not(summary) {
   padding-bottom: 14px;
 }
 
+@media (min-width: 769px) {
+  .sidebar-desktop {
+    display: flex;
+  }
+
+  /* desktop never shows the hamburger, drawer, or its overlay */
+  .hw-topbar .hamburger,
+  .hamburger,
+  .sidebar-mobile,
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
-  .head-user {
-    padding: 12px 14px;
+  html[data-theme] {
+    --topbar-h: 64px;
+    --topbar-logo-h: 44px;
   }
 
-  .header-brand-line {
-    display: none;
+  .hw-shell {
+    margin-left: 0;
   }
 
-  .header-links {
-    display: none;
-  }
-
-  .hamburger {
+  .hw-topbar .hamburger {
     display: inline-flex;
   }
 
-  .header-logo {
-    height: 65px;
-  }
-
   .hw-main {
-    padding: calc(var(--header-h) + 20px) 14px 48px;
+    padding: 20px 14px 48px;
   }
   .hw-title {
     font-size: 22px;
@@ -858,6 +996,218 @@ details > *:not(summary) {
   color: var(--text-muted);
   font-size: 12.5px;
   max-width: 46ch;
+}
+
+/* Profile card (ported from hello-world-jobs twitter-profile.css) */
+.twitter-profile-container {
+  margin: 0 auto;
+  background: linear-gradient(145deg, var(--bg-soft), var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.twitter-banner {
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-2);
+  background-image: linear-gradient(
+      color-mix(in srgb, var(--globe-accent, var(--text-muted)) 22%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--globe-accent, var(--text-muted)) 22%, transparent) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 14px 14px,
+      color-mix(in srgb, var(--globe-accent, var(--text-muted)) 30%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 28px 28px, 28px 28px, 28px 28px;
+}
+
+.twitter-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--bg) 60%, transparent) 100%
+  );
+  pointer-events: none;
+}
+
+.twitter-profile-section {
+  padding: 0 16px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.twitter-profile-pic-container {
+  margin-top: -50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 5;
+}
+
+.twitter-profile-pic {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid var(--bg);
+  overflow: hidden;
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.twitter-profile-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.twitter-profile-pic-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  background: var(--gradient);
+  color: var(--bg);
+}
+
+.twitter-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.twitter-stat {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.twitter-stat span {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.twitter-stat-value {
+  font-weight: 700;
+}
+
+.twitter-profile-info {
+  padding: 12px 0;
+}
+
+.twitter-display-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.twitter-username {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.twitter-tab-content {
+  padding: 16px 0;
+}
+
+.twitter-about-section {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.twitter-about-row,
+.twitter-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.twitter-about-label,
+.twitter-info-label {
+  color: var(--text-muted);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.twitter-about-value,
+.twitter-info-value {
+  color: var(--text);
+  font-size: 14px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.twitter-info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.twitter-tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.twitter-tech-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.35rem 0.8rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.twitter-link-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
+  text-decoration: none !important;
+}
+
+.twitter-link-item:hover,
+.twitter-link-item:focus-visible {
+  color: var(--text);
+}
+
+.twitter-link-item a,
+.twitter-link-item span {
+  text-decoration: none !important;
 }
 
 .hw-btn:disabled {

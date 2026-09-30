@@ -9,14 +9,14 @@ A roadmap is one API call that returns three things: a scaffold of the job, proj
 
 ## The call
 
-`POST /v1/roadmaps` with:
+`POST /api/v1/roadmaps` with:
 
 ```json
 { "jobId": "<job_id>", "model": "<model>", "exportToNotion": false }
 ```
 
-- `jobId` is required. Get it from `GET /v1/jobs` or `GET /v1/jobs?key=<job_id>`.
-- `model` is optional. Omit it to let the server pick. To choose explicitly, read `GET /v1/me/ai` first and use a model from a connected engine.
+- `jobId` is required. Get it from `GET /api/v1/jobs` or `GET /api/v1/jobs?key=<job_id>`.
+- `model` is optional. Omit it to let the server pick. To choose explicitly, read `GET /api/v1/me/ai` first and use a model from a connected engine.
 - `exportToNotion` defaults to false. It needs the user's Notion token, which is stored server-side.
 
 Authorize with `Authorization: Bearer $SGK`. If you are working inside the control panel, use the local `POST /api/roadmaps` proxy instead so you never touch the key.
@@ -35,7 +35,7 @@ The first run for a given role costs 25 cowrie tokens. Subsequent runs for the s
 
 ## Choosing an engine
 
-`GET /v1/me/ai` returns the engines the user has connected, each with a `models` list. Prefer what they have actually connected. If they have none, tell them to connect one on the setup page rather than guessing a provider.
+`GET /api/v1/me/ai` returns the engines the user has connected, each with a `models` list. Prefer what they have actually connected. If they have none, tell them to connect one on the setup page rather than guessing a provider.
 
 ## Writing the output for a human
 
@@ -52,5 +52,5 @@ The first run for a given role costs 25 cowrie tokens. Subsequent runs for the s
 | 400 "Payment failed" | Balance too low for a first run on this role. Runs on already-paid roles are free. |
 | 400 "jobId is required" | You sent an empty `jobId`. Fetch the list first. |
 | 404 "Job not found" | The role was removed or the id is from a different deployment. |
-| 500 "Generation failed" | No engine could serve the request. Check `/v1/me/ai`. |
+| 500 "Generation failed" | No engine could serve the request. Check `/api/v1/me/ai`. |
 | 503 | Storage quota. Wait and retry later. |

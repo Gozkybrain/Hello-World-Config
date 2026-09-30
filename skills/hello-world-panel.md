@@ -28,24 +28,26 @@ The first run for a given role costs 25 cowrie tokens. Runs for a role the user 
 
 - **No Agent API Key configured** — the panel shows instructions to create `.env` with `SGK=sgk_...` and restart. This is a 401 with `code: "no_key"`.
 - **Key rejected** — the user regenerated their key on the setup page but did not update `.env`. Update it and restart.
-- **No engine connected** — generation is disabled. The user needs to connect OpenRouter, Ollama, or a custom endpoint on the setup page. `GET /v1/me/ai` reads engines from the server, not from the local config.
+- **No engine connected** — generation is disabled. The user needs to connect OpenRouter, Ollama, or a custom endpoint on the setup page. `GET /api/v1/me/ai` reads engines from the server, not from the local config.
 - **Nothing reachable** — if `HW_API_BASE` is set, the panel will not fall back to localhost. Unset it if the user wants the fallback.
 - **Notion export failed** — the token is stored server-side against the user. The log reports the failure and generation still succeeds.
 
 ## API paths used by the panel
 
-Local proxy (browser-facing) maps to upstream Agent API (key-bearing):
+Local proxy (browser-facing) maps to upstream Agent API (key-bearing). Every upstream route carries the `/api/v1` prefix:
 
 | Local | Upstream |
 |---|---|
-| `GET /api/me` | `GET /v1/me` |
-| `GET /api/engines` | `GET /v1/me/ai` |
-| `GET /api/jobs?key=` | `GET /v1/jobs?key=` |
-| `GET /api/jobs?limit=&page=&search=&type=` | `GET /v1/jobs` |
-| `GET /api/startups?sort=&search=&limit=` | `GET /v1/startups` |
-| `POST /api/roadmaps` | `POST /v1/roadmaps` |
+| `GET /api/me` | `GET /api/v1/me` |
+| `GET /api/engines` | `GET /api/v1/me/ai` |
+| `GET /api/jobs?key=` | `GET /api/v1/jobs?key=<job_id>` |
+| `GET /api/jobs?limit=&page=&search=&type=` | `GET /api/v1/jobs` |
+| `GET /api/startups?sort=&search=&limit=` | `GET /api/v1/startups` |
+| `POST /api/roadmaps` | `POST /api/v1/roadmaps` |
 
 If you extend the panel, add a proxy route and call through `lib/api.js` rather than fetching the upstream API from the browser. That is the only way to keep the key off the client.
+
+To read the API directly instead of going through the panel, use the base resolution and curl recipe in `skills/wire-an-agent.md`. Do not hand-write endpoint paths from memory — the prefix is easy to get wrong.
 
 ## Reading AI output
 
