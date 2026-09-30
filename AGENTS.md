@@ -31,6 +31,10 @@ The app reads configuration on the server only (`lib/env.js`):
 - **Error handling**: Local proxies should call `guard()` first (returns `{code:'no_key'}`) and `fail(err)` for downstream errors. Client components use `lib/useApi.js` which normalizes non-2xx to `{ error, code }`.
 - **TypeScript**: Not required. Follow existing plain JS style (no TypeScript annotations unless necessary). No comments added unless asked.
 
+## Role context (skills/)
+
+`skills/` holds one directory per role, each with a `SKILL.md` (`frontend/`, `backend/`, `mobile/`, `data/`, `security/`, `devops/`, `blockchain/`, `uiux/`, `product/`, `content/` for creators/community, `writer/`, `educator/`, plus `cold-dm/` for outreach). Each role skill is a roadmap builder: it personalizes to the user, generates a dated roadmap, proposes proof-of-work, and hands over the build/execution plan — and can produce the actual material (scripts, courses, drafts, specs) in conversation. Before generating any roadmap, project plan, proof-of-work idea, or role-specific advice: read the matching `skills/<role>/SKILL.md` first. Before advising on applying, cold DMs, LinkedIn, or email outreach: read `skills/cold-dm/SKILL.md` first. If no matching role directory exists, say so instead of guessing. Add new role directories as needed.
+
 ## Key files
 
 | File | Purpose |
@@ -60,7 +64,13 @@ The app reads configuration on the server only (`lib/env.js`):
 
 ## Skills and setups
 
-`skills/` and `setups/` contain neutral markdown instructions for agents. They describe how to use this control panel and how the Agent API is wired. Keep them agent-agnostic (no tool-specific lock-in unless unavoidable). The default recommendation is "neutral markdown + one agent folder" if you later add per-agent folders.
+`skills/` and `setups/` contain neutral markdown instructions for agents.
+
+- `skills/<role>/SKILL.md` — role roadmap builders. Read the matching one before any roadmap, plan, proof-of-work, or role advice (see above).
+- `setups/first-run.md` — ordered install/troubleshooting checklist. Read it before helping anyone set up, run, or debug this panel.
+- `setups/connect-an-engine.md` — OpenRouter/Ollama/custom engine wiring and cost. Read it before helping with engines, model selection, or generation failures.
+
+Keep them agent-agnostic (no tool-specific lock-in unless unavoidable).
 
 ## Deployment note
 
