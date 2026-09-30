@@ -11,6 +11,7 @@ node_modules
 .next
 out
 build
+scripts
 next-env.d.ts
 
 # local secrets -- your Agent API Key lives here and must never be committed

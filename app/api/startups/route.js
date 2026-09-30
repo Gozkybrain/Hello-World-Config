@@ -26,6 +26,8 @@ export async function GET(request) {
 
     const data = await getStartups({
       search: params.get("search") || "",
+      paid: params.get("paid") || "",
+      limit: params.get("limit") || "",
     });
 
     const headers = {};

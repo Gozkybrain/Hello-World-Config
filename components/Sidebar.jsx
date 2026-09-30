@@ -58,7 +58,7 @@ export default function Sidebar() {
         if (!alive) return;
         setUser(data?.user || null);
         setCounts({
-          "/jobs": Array.isArray(data?.applications)
+          "/favourites": Array.isArray(data?.applications)
             ? data.applications.length
             : 0,
         });

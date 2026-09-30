@@ -2,6 +2,19 @@
 
 import Link from "next/link";
 
+function plain(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function Description({ value }) {
+  const text = plain(value);
+  if (!text) return null;
+  return <p className="hw-item-desc">{text}</p>;
+}
+
 /** A company logo, falling back to initials when the icon is missing or broken. */
 export function Avatar({ src, name }) {
   const letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
@@ -73,10 +86,12 @@ export function StartupCard({ startup }) {
           <p className="hw-item-title">{startup.name || "Unnamed"}</p>
           <p className="hw-item-sub">
             {jobs} open {jobs === 1 ? "role" : "roles"}
-            {startup.oneLiner ? ` · ${startup.oneLiner}` : ""}
+            {startup.country ? ` · ${startup.country}` : ""}
           </p>
         </div>
       </div>
+
+      <Description value={startup.description} />
 
       {(startup.categories || []).length > 0 && (
         <div className="hw-chips">

@@ -43,7 +43,7 @@ export default function Startups() {
 
   if (error?.code === "no_key") {
     return (
-      <main className="hw-main">
+      <main className="hw-main hw-starts">
         <h1 className="hw-title">Startups</h1>
         <KeyMissing error={error} />
       </main>
@@ -56,7 +56,7 @@ export default function Startups() {
   const countdown = now ? resetIn(data?.refreshAt, now) : null;
 
   return (
-    <main className="hw-main">
+    <main className="hw-main hw-starts">
       <h1 className="hw-title">Startups</h1>
       <p className="hw-sub">
         {mapped && when

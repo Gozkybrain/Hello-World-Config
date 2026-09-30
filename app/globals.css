@@ -1214,3 +1214,31 @@ details > *:not(summary) {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ---------- startups listing: monochrome, 7px radius ---------- */
+
+.hw-starts .hw-title {
+  background: none;
+  color: var(--text);
+  -webkit-text-fill-color: currentColor;
+}
+
+.hw-starts .hw-item,
+.hw-starts .hw-card,
+.hw-starts .hw-avatar,
+.hw-starts .hw-avatar--ph,
+.hw-starts .hw-chip {
+  border-radius: 7px;
+}
+
+.hw-starts .hw-item-desc {
+  margin: 9px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

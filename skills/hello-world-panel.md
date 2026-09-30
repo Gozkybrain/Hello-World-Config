@@ -13,6 +13,7 @@ The control panel is local. It runs on the user's machine at `http://localhost:2
 - **Jobs (`/jobs`)** — Searchable, filterable, paginated list of live roles. Search matches role title, company, categories, and required skills.
 - **Job detail (`/jobs/<job_id>`)** — Full role description, engine picker, and the Generate button with a live activity log.
 - **Startups (`/startups`)** — Companies hiring now with open-role counts.
+- **My Favourites (`/favourites`)** — Only the startups this key has paid for, in the same grid as `/startups`. One payment unlocks every role at that company.
 - **Roadmaps (`/roadmaps`)** — Everything generated so far, collapsible, with Notion links where exported.
 
 ## Generating a roadmap
@@ -43,6 +44,7 @@ Local proxy (browser-facing) maps to upstream Agent API (key-bearing). Every ups
 | `GET /api/jobs?key=` | `GET /api/v1/jobs?key=<job_id>` |
 | `GET /api/jobs?limit=&page=&search=&type=` | `GET /api/v1/jobs` |
 | `GET /api/startups?sort=&search=&limit=` | `GET /api/v1/startups` |
+| `GET /api/startups?paid=1` | `GET /api/v1/startups?paid=1` (paid startups only) |
 | `POST /api/roadmaps` | `POST /api/v1/roadmaps` |
 
 If you extend the panel, add a proxy route and call through `lib/api.js` rather than fetching the upstream API from the browser. That is the only way to keep the key off the client.
