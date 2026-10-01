@@ -11,7 +11,7 @@ const oswald = Oswald({
 const themeInitScript = `(function(){try{var t=localStorage.getItem("hw-theme");if(!t){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}})();`;
 
 export const metadata = {
-  title: "Hello World Control Panel",
+  title: "Hello World Config",
   description:
     "Run Hello World Jobs locally: browse jobs, connect engines, and generate roadmaps.",
   icons: {

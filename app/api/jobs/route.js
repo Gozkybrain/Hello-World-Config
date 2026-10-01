@@ -20,6 +20,7 @@ export async function GET(request) {
         page: params.get("page") || 1,
         search: params.get("search") || "",
         type: params.get("type") || "",
+        startupKey: params.get("startupKey") || "",
       })
     );
   } catch (err) {
