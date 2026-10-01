@@ -615,6 +615,26 @@ pre {
   display: flex;
   align-items: flex-start;
   gap: 11px;
+  position: relative;
+}
+
+.hw-unlocked {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.hw-unlocked svg {
+  width: 10px;
+  height: 10px;
+  display: block;
 }
 
 .hw-avatar {

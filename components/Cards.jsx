@@ -81,6 +81,20 @@ export function StartupCard({ startup }) {
   const inner = (
     <>
       <div className="hw-item-top">
+        {startup.paid && (
+          <span className="hw-unlocked" title="Unlocked" aria-label="Unlocked">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
+          </span>
+        )}
         <Avatar src={startup.icon} name={startup.name} />
         <div style={{ minWidth: 0 }}>
           <p className="hw-item-title">{startup.name || "Unnamed"}</p>
