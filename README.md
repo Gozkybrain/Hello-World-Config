@@ -17,7 +17,11 @@ This repository contains the local control panel and agent wiring for running [H
 ## Quick start
 
 1. Clone this repo or download the ZIP.
-2. Copy `.env.example` to `.env` and paste your Agent API Key: `SGK=sgk_...`
+2. Create a `.env` file with your Agent API Key (or use the command below):
+   ```bash
+   echo "SGK=sgk_your_key_here" > .env
+   ```
+   Replace `sgk_your_key_here` with the key from the Hello World setup page.
 3. Install dependencies: `npm install`
 4. Run the panel: `npm run dev`
 5. Open `http://localhost:2026`
@@ -26,7 +30,31 @@ The panel will show your balance, connected engines, jobs, startups, and let you
 
 ## Environment
 
-Create `.env` in the root:
+`.env` lives in the project root and is gitignored, so it never gets committed. You do not need a template file — create it with a single command.
+
+**Create it:**
+
+```bash
+echo "SGK=sgk_your_key_here" > .env
+```
+
+Then swap `sgk_your_key_here` for the real key. While it still holds that exact placeholder, the panel reports the key as not configured instead of failing, so it is safe to leave in place while you set things up.
+
+**Update a key later** — rewrite the file:
+
+```bash
+echo "SGK=sgk_your_new_key_here" > .env
+```
+
+Or change one line and keep the rest, which is what you want when you have added other values:
+
+```bash
+sed -i '' 's|^SGK=.*|SGK=sgk_your_new_key_here|' .env
+```
+
+On Linux, use `sed -i` without the empty quotes.
+
+The final file looks like this:
 
 ```env
 SGK=sgk_your_key_here
@@ -35,6 +63,8 @@ SGK=sgk_your_key_here
 
 - `SGK` (required) — Your Agent API Key from the Hello World setup page.
 - `HW_API_BASE` (optional) — Point at a different Hello World deployment. When set, the panel stops falling back to localhost, so you are never silently redirected to a different server.
+
+Restart `npm run dev` after editing, because the key is read once at startup.
 
 ## Scripts
 
@@ -61,7 +91,6 @@ SGK=sgk_your_key_here
 ├── setups/             # Setup instructions (neutral markdown)
 ├── config.json         # Shared config contract (engine list, defaults)
 ├── config.schema.json  # JSON Schema for config.json
-├── .env.example        # Environment template
 ├── AGENTS.md           # Agent-facing operating instructions
 └── README.md           # This file
 ```
@@ -74,7 +103,15 @@ SGK=sgk_your_key_here
 
 ## Agents
 
-This repo is designed to be agent-neutral. The `skills/` and `setups/` folders contain plain markdown that any agent can read. If your agent uses a special folder (for example `.opencode/`), you can create a symlink or copy the relevant instructions into that folder. `AGENTS.md` provides the highest-level operating instructions for the agent running inside this workspace.
+This repo is designed to be agent-neutral. The `skills/` and `setups/` folders contain plain markdown that any agent can read — no tooling or plugin required. `AGENTS.md` is the entry point: it tells the agent which skill applies to a task, and the agent opens that file.
+
+If your agent looks for skills in a specific folder (`.opencode/skills/`, `.claude/skills/`), point it at `skills/` with a symlink rather than copying files:
+
+```bash
+mkdir -p .opencode/skills && ln -s ../../skills/* .opencode/skills/
+```
+
+Skills are still discoverable without any of this, because the agent reads `AGENTS.md` and follows it. The symlink only adds auto-discovery and `@` autocomplete.
 
 ## Notes
 
