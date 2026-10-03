@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useApi } from "@/lib/useApi";
 import { Avatar } from "@/components/Cards";
+import Loader from "@/components/Loader";
 import { ErrorState, KeyMissing, Loading } from "@/components/States";
 
 const TABS = [
@@ -30,8 +31,9 @@ function Chips({ values, limit = 8, className = "hw-chip" }) {
   );
 }
 
-function Row({ label, value }) {
+function LinkRow({ label, value }) {
   if (!value || value === "—") return null;
+  const href = safeHref(value);
   return (
     <div
       className="hw-pager"
@@ -40,20 +42,39 @@ function Row({ label, value }) {
       <span className="hw-pager-note" style={{ margin: 0 }}>
         {label}
       </span>
-      <span style={{ fontSize: 13, textAlign: "right", minWidth: 0 }}>{value}</span>
+      {href ? (
+        <a
+          className="hw-link"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="hw-link hw-link--plain">{value}</span>
+      )}
     </div>
   );
 }
 
-function Raised({ data }) {
+function Raised({ data, links }) {
   const f = data;
-  if (!f) return null;
+  const linkRows = [
+    ["Website", links?.website],
+    ["X", links?.twitter],
+    ["GitHub", links?.github],
+    ["Whitepaper", links?.whitepaper],
+  ].filter(([, v]) => v && v !== "—");
 
-  const rounds = Array.isArray(f.funding_rounds) ? f.funding_rounds : [];
-  const investors = Array.isArray(f.investors) ? f.investors.filter(Boolean) : [];
-  const funds = Array.isArray(f.funds) ? f.funds.filter(Boolean) : [];
-  const nothing = !f.total_raised && !rounds.length && !investors.length && !funds.length;
-  if (nothing) return null;
+  if (!f && !linkRows.length) return null;
+
+  const rounds = Array.isArray(f?.funding_rounds) ? f.funding_rounds : [];
+  const investors = Array.isArray(f?.investors) ? f.investors.filter(Boolean) : [];
+  const funds = Array.isArray(f?.funds) ? f.funds.filter(Boolean) : [];
+  const nothing =
+    !f?.total_raised && !rounds.length && !investors.length && !funds.length;
+  if (nothing && !linkRows.length) return null;
 
   return (
     <div className="hw-raised">
@@ -118,9 +139,21 @@ function Raised({ data }) {
           </ul>
         </div>
       )}
+
+      {linkRows.length > 0 && (
+        <div className="hw-raised-block">
+          <p className="hw-raised-label">Links</p>
+          <div className="hw-links">
+            {linkRows.map(([label, value]) => (
+              <LinkRow key={label} label={label} value={value} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 function safeHref(value) {
   const raw = String(value || "").trim();
@@ -131,6 +164,83 @@ function safeHref(value) {
   } catch {
     return "";
   }
+}
+
+function linkDomain(value) {
+  const href = safeHref(value);
+  if (!href) return "";
+  try {
+    const host = new URL(href).hostname.replace(/^www\./i, "");
+    return host.split(".")[0] || host;
+  } catch {
+    return "";
+  }
+}
+
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      fill="currentColor"
+      d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644Z"
+    />
+  </svg>
+);
+
+const LinkedInIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      fill="currentColor"
+      d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13Zm1.78 13.02H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"
+    />
+  </svg>
+);
+
+const GitHubIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      fill="currentColor"
+      d="M12 .3a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.41-1.31.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.28-1.23 3.28-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.47 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.83.58A12 12 0 0 0 12 .3Z"
+    />
+  </svg>
+);
+
+const TEAM_LINK_ICONS = {
+  x: { label: "X", Icon: XIcon },
+  linkedin: { label: "LinkedIn", Icon: LinkedInIcon },
+  github: { label: "GitHub", Icon: GitHubIcon },
+};
+
+function PersonLinks({ links }) {
+  const entries = Object.entries(links || {}).filter(([, v]) => safeHref(v));
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="hw-team-links">
+      {entries.map(([key, value]) => {
+        const href = safeHref(value);
+        const known = TEAM_LINK_ICONS[key];
+        return (
+          <a
+            key={key}
+            className="hw-team-link"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={href}
+            aria-label={known ? `${known.label} profile` : linkDomain(value) || key}
+          >
+            {known ? (
+              <known.Icon />
+            ) : (
+              <span className="hw-team-link-label">
+                {linkDomain(value) || value}
+              </span>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  );
 }
 
 function News({ items }) {
@@ -178,44 +288,39 @@ function News({ items }) {
 
 function JobRow({ job, startupKey, purchased }) {
   const title = job.job_title || job.name || "Untitled role";
-
-  const inner = (
-    <>
-      <p className="hw-item-title" style={{ margin: 0 }}>
-        {title}
-      </p>
-      {(job.categories || []).length > 0 && (
-        <Chips values={job.categories} limit={4} className="hw-tag" />
-      )}
-      {purchased && (
-        <span className="hw-job-open">
-          View role
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 12h14m-6-6 6 6-6 6"
-            />
-          </svg>
-        </span>
-      )}
-    </>
-  );
-
-  if (!purchased) {
-    return <div className="hw-card hw-job">{inner}</div>;
-  }
+  const skills = Array.isArray(job.preferred_skills)
+    ? job.preferred_skills.filter(Boolean)
+    : [];
+  const responsibilities = Array.isArray(job.responsibilities)
+    ? job.responsibilities.filter(Boolean)
+    : [];
 
   return (
-    <Link
-      className="hw-card hw-job hw-job--link"
-      href={`/startups/${encodeURIComponent(startupKey)}/${encodeURIComponent(job.job_id)}`}
-    >
-      {inner}
-    </Link>
+    <div className="hw-card hw-job">
+      {purchased ? (
+        <Link
+          className="hw-item-title hw-job-title"
+          href={`/startups/${encodeURIComponent(startupKey)}/${encodeURIComponent(job.job_id)}`}
+        >
+          {title}
+        </Link>
+      ) : (
+        <p className="hw-item-title">{title}</p>
+      )}
+      {skills.length > 0 && (
+        <Chips values={skills} limit={8} className="hw-tag" />
+      )}
+      {responsibilities.length > 0 && (
+        <div className="hw-job-resp-block">
+          <p className="hw-raised-label">Responsibilities</p>
+          <ul className="hw-job-resp">
+            {responsibilities.map((item, i) => (
+              <li key={`${item}-${i}`}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -311,8 +416,16 @@ export default function StartupDetail() {
   const teams = Array.isArray(s.team) ? s.team : s.team ? [s.team] : [];
   const jobList = jobsData?.jobs || [];
 
+  const followers = Number(s.paidCount) || 0;
+  const followerLabel =
+    followers === 0
+      ? "No Users following"
+      : followers === 1
+        ? "1 User Following"
+        : `${followers} Users Following`;
+
   return (
-    <main className="hw-main">
+    <main className="hw-page">
       <div className="hw-item hw-item--static hw-head">
         <div className="hw-item-top">
           {purchased && (
@@ -394,12 +507,13 @@ export default function StartupDetail() {
           </div>
         </div>
 
-        {(s.date || s.description) && (
-          <div className="hw-head-meta">
+        <div className="hw-head-meta">
+          <div className="hw-head-pills">
             {s.date && <span className="hw-head-date">Listed {s.date}</span>}
-            {s.description && <p className="hw-head-desc">{s.description}</p>}
+            <span className="hw-head-follow">{followerLabel}</span>
           </div>
-        )}
+          {s.description && <p className="hw-head-desc">{s.description}</p>}
+        </div>
 
         <Chips values={s.categories} className="hw-tag" />
       </div>
@@ -458,26 +572,14 @@ export default function StartupDetail() {
             </div>
           )}
 
-          <Raised data={s.fundraising} />
-
-          {purchased && (
-            <>
-              <h2 className="hw-section-title">Links</h2>
-              <div className="hw-card">
-                <Row label="Website" value={links.website} />
-                <Row label="X" value={links.twitter} />
-                <Row label="GitHub" value={links.github} />
-                <Row label="Whitepaper" value={links.whitepaper} />
-              </div>
-            </>
-          )}
+          <Raised data={s.fundraising} links={purchased ? links : null} />
         </div>
       )}
 
       {tab === "jobs" && (
         <div className="hw-tab-panel">
           {jobsLoading ? (
-            <Loading />
+            <Loader />
           ) : jobList.length === 0 ? (
             <div className="hw-card">
               <p style={{ margin: 0 }}>No open roles right now.</p>
@@ -512,12 +614,22 @@ export default function StartupDetail() {
           ) : (
             <div className="hw-grid">
               {teams.map((m, i) => (
-                <div className="hw-card" key={m?.name || i}>
-                  <p className="hw-item-title" style={{ margin: 0 }}>
-                    {m?.name || "Team member"}
-                  </p>
-                  {m?.role && <p className="hw-item-sub">{m.role}</p>}
-                  {m?.bio && <p style={{ marginTop: 8 }}>{m.bio}</p>}
+                <div className="hw-card hw-person" key={m?.name || i}>
+                  <div className="hw-person-top">
+                    <Avatar src={m?.img || s?.icon} name={m?.name} />
+                    <div className="hw-person-id">
+                      <p className="hw-item-title" style={{ margin: 0 }}>
+                        {m?.name || "Team member"}
+                      </p>
+                      {m?.role && (
+                        <p className="hw-item-sub" style={{ margin: "3px 0 0" }}>
+                          {m.role}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {m?.background && <p className="hw-person-bio">{m.background}</p>}
+                  <PersonLinks links={m?.links} />
                 </div>
               ))}
             </div>
