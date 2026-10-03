@@ -1,37 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/lib/useApi";
 import { Avatar } from "@/components/Cards";
 import { ErrorState, KeyMissing, Loading } from "@/components/States";
 
-function Tags({ values, limit = 12 }) {
+function Chips({ values, limit = 12, className = "hw-tag" }) {
   const list = (values || []).slice(0, limit);
   if (!list.length) return null;
   return (
     <div className="hw-chips">
       {list.map((v) => (
-        <span className="hw-tag" key={v}>
+        <span className={className} key={v}>
           {v}
         </span>
       ))}
     </div>
-  );
-}
-
-function List({ title, items }) {
-  const list = (items || []).filter(Boolean);
-  if (!list.length) return null;
-  return (
-    <>
-      <h2 className="hw-section-title">{title}</h2>
-      <ul className="hw-bullets">
-        {list.map((item, i) => (
-          <li key={i}>{String(item)}</li>
-        ))}
-      </ul>
-    </>
   );
 }
 
@@ -46,10 +32,91 @@ function safeHref(value) {
   }
 }
 
+// Public origin for outbound apply links. The local apps are previews, so
+// anything a candidate should open has to leave the preview host.
+const PUBLIC_SITE_ORIGIN = "https://helloworldjobs.net";
+
+const LINK_LABELS = {
+  website: "Website",
+  twitter: "X",
+  x: "X",
+  linkedin: "LinkedIn",
+  github: "GitHub",
+  telegram: "Telegram",
+  discord: "Discord",
+  whitepaper: "Whitepaper",
+  apply: "Apply",
+  careers: "Careers",
+};
+
+function Block({ title, items }) {
+  const list = (items || []).filter(Boolean);
+  if (!list.length) return null;
+  return (
+    <div className="hw-raised-block">
+      <p className="hw-raised-label">{title}</p>
+      <ul className="hw-job-resp">
+        {list.map((item, i) => (
+          <li key={`${item}-${i}`}>{String(item)}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function MetaRow({ label, value }) {
+  if (value === undefined || value === null || value === "" || value === "—") {
+    return null;
+  }
+  return (
+    <div
+      className="hw-pager"
+      style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}
+    >
+      <span className="hw-pager-note" style={{ margin: 0 }}>
+        {label}
+      </span>
+      <span className="hw-link hw-link--plain">
+        {Array.isArray(value) ? value.join(" · ") : String(value)}
+      </span>
+    </div>
+  );
+}
+
+function LinkRow({ label, value }) {
+  const href = safeHref(value);
+  if (!href) return null;
+  return (
+    <div
+      className="hw-pager"
+      style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}
+    >
+      <span className="hw-pager-note" style={{ margin: 0 }}>
+        {label}
+      </span>
+      <a
+        className="hw-link"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {String(value)}
+      </a>
+    </div>
+  );
+}
+
 export default function StartupJobDetail() {
   const params = useParams();
+  const router = useRouter();
   const startupKey = decodeURIComponent(params?.key || "");
   const jobId = decodeURIComponent(params?.jobId || "");
+  const startupHref = `/startups/${encodeURIComponent(startupKey)}`;
+  // "Apply Online" always points at the public listing page for this role, not
+  // the local preview, so the candidate lands on the real apply surface.
+  const applyHref = safeHref(
+    `${PUBLIC_SITE_ORIGIN}/startups/${encodeURIComponent(startupKey)}/${encodeURIComponent(jobId)}`
+  );
 
   const { data, error, loading, reload } = useApi(
     `/api/jobs?key=${encodeURIComponent(jobId)}`
@@ -58,17 +125,27 @@ export default function StartupJobDetail() {
     `/api/startups?key=${encodeURIComponent(startupKey)}`
   );
 
-  if (loading) {
+  const purchased = data?.purchased === true;
+  const needsKey = error?.code === "no_key";
+
+  // A role body only exists for someone who has paid for the parent startup,
+  // so everyone else is bounced back to the startup page to unlock it.
+  useEffect(() => {
+    if (loading || needsKey) return;
+    if (!purchased) router.replace(startupHref);
+  }, [loading, needsKey, purchased, router, startupHref]);
+
+  if (loading || (!purchased && !needsKey)) {
     return (
-      <main className="hw-main">
+      <main className="hw-page">
         <Loading />
       </main>
     );
   }
 
-  if (error?.code === "no_key") {
+  if (needsKey) {
     return (
-      <main className="hw-main">
+      <main className="hw-page">
         <KeyMissing error={error} />
       </main>
     );
@@ -76,8 +153,8 @@ export default function StartupJobDetail() {
 
   if (error) {
     return (
-      <main className="hw-main">
-        <Link className="hw-back" href={`/startups/${encodeURIComponent(startupKey)}`}>
+      <main className="hw-page">
+        <Link className="hw-back" href={startupHref}>
           Back to startup
         </Link>
         <ErrorState
@@ -91,14 +168,16 @@ export default function StartupJobDetail() {
   }
 
   const job = data?.job || {};
-  const paid = data?.paid === true;
   const company = startupData?.startup || {};
-  const links = job.links || {};
-  const linkEntries = Object.entries(links).filter(([, v]) => safeHref(v));
+  const title = job.job_title || job.name || "Untitled role";
+  const attributes = job.attributes || {};
+  const linkEntries = Object.entries(job.links || {}).filter(([, v]) =>
+    safeHref(v)
+  );
 
   return (
-    <main className="hw-main">
-      <Link className="hw-back" href={`/startups/${encodeURIComponent(startupKey)}`}>
+    <main className="hw-page">
+      <Link className="hw-back" href={startupHref}>
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path
             fill="none"
@@ -112,103 +191,101 @@ export default function StartupJobDetail() {
         {company.name || startupKey}
       </Link>
 
-      <div className="hw-item hw-item--static hw-head">
+      <div className="hw-item hw-item--static hw-head hw-role-head">
         <div className="hw-item-top">
-          {paid && (
-            <span className="hw-unlocked" title="Unlocked" aria-label="Unlocked">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20 6 9 17l-5-5"
-                />
-              </svg>
-            </span>
-          )}
+          <span className="hw-unlocked" title="Unlocked" aria-label="Unlocked">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
+          </span>
           <Avatar src={company.icon} name={company.name} />
           <div style={{ minWidth: 0 }}>
             <h1 className="hw-title" style={{ margin: 0, fontSize: 22 }}>
-              {job.job_title || job.name || "Untitled role"}
+              {title}
             </h1>
-            {job.job_id && <p className="hw-head-key">{job.job_id}</p>}
-            {company.name && <p className="hw-item-sub">{company.name}</p>}
           </div>
         </div>
 
-        <Tags values={job.categories} />
+        <div className="hw-role-actions">
+          <Chips values={job.categories} />
+
+          {applyHref && (
+            <a
+              className="hw-btn hw-btn--primary"
+              href={applyHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg
+                className="hw-btn-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7 17 17 7m0 0H8m9 0v9"
+                />
+              </svg>
+              Apply Online
+            </a>
+          )}
+        </div>
       </div>
 
-      {paid ? (
-        <>
-          {job.description && (
-            <>
-              <h2 className="hw-section-title">About the role</h2>
-              <div className="hw-card">
-                <p style={{ margin: 0 }}>{job.description}</p>
-              </div>
-            </>
-          )}
-
-          <List title="Responsibilities" items={job.responsibilities} />
-          <List title="Requirements" items={job.required_skills} />
-          <List title="Nice to have" items={job.preferred_skills} />
-          <List title="Perks" items={job.perks} />
-          <Tags values={job.skills} />
-
-          {linkEntries.length > 0 && (
-            <>
-              <h2 className="hw-section-title">Apply</h2>
-              <div className="hw-apply">
-                {linkEntries.map(([k, v]) => (
-                  <a
-                    className="hw-btn hw-unlock"
-                    key={k}
-                    href={safeHref(v)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {k}
-                  </a>
-                ))}
-              </div>
-            </>
-          )}
-
-          <div className="hw-cta">
-            <Link className="hw-btn hw-unlock" href={`/jobs/${encodeURIComponent(jobId)}`}>
-              Generate roadmap
-            </Link>
+      <div className="hw-raised hw-role-body">
+        {job.description && (
+          <div className="hw-raised-block">
+            <p className="hw-raised-label">About the role</p>
+            <p className="hw-person-bio">{job.description}</p>
           </div>
-        </>
-      ) : (
-        <div className="hw-card hw-locked">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M7 11V8a5 5 0 0 1 10 0v3"
-            />
-            <rect x="4" y="11" width="16" height="10" rx="2" fill="currentColor" />
-          </svg>
-          <p className="hw-locked-title">This role is locked</p>
-          <p className="hw-locked-text">
-            Unlock {company.name || startupKey} to read the full description,
-            requirements and application link.
-          </p>
-          <Link
-            className="hw-btn hw-unlock"
-            href={`/startups/${encodeURIComponent(startupKey)}`}
-          >
-            Unlock {company.name || startupKey}
-          </Link>
+        )}
+
+        <div className="hw-role-cols">
+          <Block title="Responsibilities" items={job.responsibilities} />
+          <Block title="Requirements" items={job.required_skills} />
         </div>
-      )}
+        <Block title="Perks" items={job.perks} />
+
+        {(attributes.location || attributes.employment_type) && (
+          <div className="hw-raised-block">
+            <p className="hw-raised-label">Details</p>
+            <div className="hw-links">
+              <MetaRow label="Location" value={attributes.location} />
+              <MetaRow
+                label="Employment type"
+                value={attributes.employment_type}
+              />
+            </div>
+          </div>
+        )}
+
+        {linkEntries.length > 0 && (
+          <div className="hw-raised-block">
+            <p className="hw-raised-label">Links</p>
+            <div className="hw-links">
+              {linkEntries.map(([k, v]) => (
+                <LinkRow
+                  key={k}
+                  label={LINK_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1)}
+                  value={v}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

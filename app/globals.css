@@ -787,10 +787,6 @@ pre {
   gap: 8px;
 }
 
-.hw-cta {
-  margin-top: 28px;
-}
-
 .hw-locked {
   display: flex;
   flex-direction: column;
@@ -1342,13 +1338,7 @@ a.hw-news-title:hover {
 .hw-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.hw-btn--primary {
-  background: var(--gradient);
-  border-color: transparent;
-  color: var(--bg);
-}
-.hw-btn--sm {
+}.hw-btn--sm {
   padding: 5px 10px;
   font-size: 12px;
 }
@@ -1881,6 +1871,7 @@ details > *:not(summary) {
 }
 
 /* ---------- startup detail page (verbatim port of hello-world-jobs styles/startup-detail.css, sd- -> hw-) ---------- */
+
 /* Startup detail — ported 1:1 from hello-world-config/app/globals.css
    (all .hw-* rules used by app/startups/[key]/page.jsx, renamed to .hw-*). */
 
@@ -2648,9 +2639,11 @@ a.hw-news-title:hover {
   cursor: not-allowed;
 }
 
+/* Solid fill instead of the gradient wash. Matches `.hw-unlock` so the two
+   primary actions read the same in both the light and dark themes. */
 .hw-btn--primary {
-  background: var(--gradient);
-  border-color: transparent;
+  background: var(--text);
+  border-color: var(--text);
   color: var(--bg);
 }
 
@@ -2766,4 +2759,74 @@ a.hw-news-title:hover {
 }
 .hw-locked p {
   color: var(--text-muted);
+}
+
+.hw-role-body {
+  margin-top: 22px;
+}
+
+.hw-investor-tier {
+  margin-left: 7px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hw-investor-type {
+  margin-left: 7px;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Role header: the logo sits on the title's centre line rather than its top
+   edge, and the apply action lives on its own right-aligned row underneath. */
+.hw-role-head .hw-item-top {
+  align-items: center;
+}
+
+/* Chips and the apply action share one line and wrap on narrow screens. The
+   auto margin sits on the chips, not the button, so the button only gets pushed
+   right while the two share a line; once it wraps onto its own line it has no
+   auto margin and falls back to flex-start, i.e. left. Doing this with
+   `margin-left: auto` on the button (or justify-content: space-between) would
+   right-align it after the wrap too, which is wrong on mobile. */
+.hw-role-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 13px;
+}
+
+.hw-role-actions .hw-chips {
+  margin-top: 0;
+  margin-right: auto;
+}
+
+.hw-btn-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Responsibilities and Requirements share a row while both columns stay
+   readable, then stack. `flex-wrap` plus a basis does the breaking, so there
+   is no fixed breakpoint to drift out of sync with the content. */
+.hw-role-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 32px;
+}
+
+.hw-role-cols > * {
+  flex: 1 1 300px;
+  min-width: 0;
 }

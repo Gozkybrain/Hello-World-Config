@@ -58,6 +58,32 @@ function LinkRow({ label, value }) {
   );
 }
 
+function normalizeInvestors(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((entry) => {
+      if (typeof entry === "string") return { name: entry.trim() };
+      if (!entry || typeof entry !== "object") return null;
+      const name = typeof entry.name === "string" ? entry.name.trim() : "";
+      if (!name) return null;
+      return {
+        name,
+        tier: typeof entry.tier === "string" ? entry.tier.trim() : "",
+        type: typeof entry.type === "string" ? entry.type.trim() : "",
+      };
+    })
+    .filter(Boolean);
+}
+
+// Tier casing is inconsistent in the source data ("Lead" vs "lead"), so
+// normalise it for display while leaving acronyms and mixed-case labels alone.
+function prettyLabel(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw !== raw.toLowerCase()) return raw;
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
 function Raised({ data, links }) {
   const f = data;
   const linkRows = [
@@ -70,15 +96,34 @@ function Raised({ data, links }) {
   if (!f && !linkRows.length) return null;
 
   const rounds = Array.isArray(f?.funding_rounds) ? f.funding_rounds : [];
-  const investors = Array.isArray(f?.investors) ? f.investors.filter(Boolean) : [];
-  const funds = Array.isArray(f?.funds) ? f.funds.filter(Boolean) : [];
+  const leads = normalizeInvestors(f?.lead_investors);
+  // Lead investors are usually repeated inside `investors`, so drop the
+  // duplicates rather than printing every name twice.
+  const leadNames = new Set(leads.map((l) => l.name.toLowerCase()));
+  const investors = normalizeInvestors(f?.investors).filter(
+    (i) => !leadNames.has(i.name.toLowerCase())
+  );
   const nothing =
-    !f?.total_raised && !rounds.length && !investors.length && !funds.length;
+    !f?.total_raised && !rounds.length && !leads.length && !investors.length;
   if (nothing && !linkRows.length) return null;
+
+  const investorChips = (rows) => (
+    <ul className="hw-names">
+      {rows.map((inv, i) => (
+        <li className="hw-name" key={`${inv.name}-${i}`}>
+          {inv.name}
+          {prettyLabel(inv.tier) && (
+            <span className="hw-investor-tier">{prettyLabel(inv.tier)}</span>
+          )}
+          {inv.type && <span className="hw-investor-type">{inv.type}</span>}
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div className="hw-raised">
-      {f.total_raised && (
+      {f?.total_raised && (
         <div className="hw-raised-hero">
           <p className="hw-raised-eyebrow">Total raised</p>
           <p className="hw-raised-total">{f.total_raised}</p>
@@ -107,36 +152,17 @@ function Raised({ data, links }) {
         </div>
       )}
 
-      {investors.length > 0 && (
+      {leads.length > 0 && (
         <div className="hw-raised-block">
-          <p className="hw-raised-label">Investors</p>
-          <ul className="hw-names">
-            {investors.map((inv, i) => (
-              <li className="hw-name" key={`${inv}-${i}`}>
-                {inv}
-              </li>
-            ))}
-          </ul>
+          <p className="hw-raised-label">Lead investors</p>
+          {investorChips(leads)}
         </div>
       )}
 
-      {funds.length > 0 && (
+      {investors.length > 0 && (
         <div className="hw-raised-block">
-          <p className="hw-raised-label">Funds</p>
-          <ul className="hw-funds">
-            {funds.map((fund, i) => (
-              <li className="hw-fund" key={fund?.key || i}>
-                {fund?.icon && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img className="hw-fund-icon" src={fund.icon} alt="" />
-                )}
-                <span className="hw-fund-name">{fund?.name}</span>
-                {fund?.category?.name && (
-                  <span className="hw-fund-cat">{fund.category.name}</span>
-                )}
-              </li>
-            ))}
-          </ul>
+          <p className="hw-raised-label">Investors</p>
+          {investorChips(investors)}
         </div>
       )}
 
@@ -153,7 +179,6 @@ function Raised({ data, links }) {
     </div>
   );
 }
-
 
 function safeHref(value) {
   const raw = String(value || "").trim();
