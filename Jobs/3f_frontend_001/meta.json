@@ -1,0 +1,13 @@
+{
+  "jobId": "3f_frontend_001",
+  "startupKey": "3-f-labs",
+  "jobTitle": "3F - Frontend Engineer",
+  "startupName": "3F",
+  "model": "agent (claude), skills: frontend + cold-dm",
+  "firstGeneratedAt": "2026-10-03T13:30:02.528Z",
+  "updatedAt": "2026-10-03T23:40:03.701Z",
+  "files": {
+    "roadmap.md": "3f_frontend_001/roadmap.md",
+    "proof-of-work.md": "3f_frontend_001/proof-of-work.md"
+  }
+}
