@@ -58,6 +58,26 @@ function renderTableRow(line, tag) {
 
 const isTableDivider = (l) => /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(l) && l.includes("-");
 
+/** Leading indent of a raw line, counting a tab as four columns. */
+function indentOf(line) {
+  const m = String(line).match(/^[ \t]*/)[0];
+  let n = 0;
+  for (const ch of m) n += ch === "\t" ? 4 : 1;
+  return n;
+}
+
+/**
+ * Task list markers. Rendered as real disabled checkboxes so a reader can see
+ * progress at a glance. `disabled` keeps it a document rather than a form, so
+ * there is no state to persist and nothing to submit.
+ */
+function taskItem(content) {
+  const m = content.match(/^\[([ xX])\]\s+(.*)$/);
+  if (!m) return null;
+  const done = m[1].toLowerCase() === "x";
+  return `<input class="hw-md-check" type="checkbox" disabled${done ? " checked" : ""} /> ${m[2]}`;
+}
+
 /** Convert markdown to an HTML string with all raw input escaped. */
 export function markdownToHtml(src) {
   if (!src) return "";
@@ -78,7 +98,7 @@ export function markdownToHtml(src) {
 
   const lines = text.split("\n");
   const out = [];
-  let list = null; // "ul" | "ol"
+  const stack = []; // open lists: [{ tag, depth, liOpen }]
   let para = [];
   let table = null;
 
@@ -89,9 +109,11 @@ export function markdownToHtml(src) {
     }
   };
   const closeList = () => {
-    if (list) {
-      out.push(`</${list}>`);
-      list = null;
+    while (stack.length) {
+      const top = stack[stack.length - 1];
+      if (top.liOpen) out.push("</li>");
+      out.push(`</${top.tag}>`);
+      stack.pop();
     }
   };
   const closeTable = () => {
@@ -180,12 +202,45 @@ export function markdownToHtml(src) {
       closePara();
       closeTable();
       const want = ul ? "ul" : "ol";
-      if (list !== want) {
-        closeList();
-        out.push(`<${want}>`);
-        list = want;
+      const content = (ul || ol)[1];
+
+      // Lists nest by indentation. The roadmap puts detail bullets under their
+      // day checkbox, so the indent is what keeps them attached to the right
+      // parent instead of flattening into siblings.
+      const ind = indentOf(line);
+      while (stack.length && stack[stack.length - 1].depth > ind) {
+        const deeper = stack[stack.length - 1];
+        if (deeper.liOpen) { out.push("</li>"); deeper.liOpen = false; }
+        out.push(`</${deeper.tag}>`);
+        stack.pop();
       }
-      out.push(`<li>${inline(escapeHtml((ul || ol)[1]))}</li>`);
+      let top = stack[stack.length - 1];
+      if (top && top.depth === ind && top.tag !== want) {
+        // Same level but a different marker, so this starts a sibling list.
+        if (top.liOpen) { out.push("</li>"); top.liOpen = false; }
+        out.push(`</${top.tag}>`);
+        stack.pop();
+        top = undefined;
+      }
+      if (!top || top.depth < ind) {
+        out.push(`<${want}>`);
+        top = { tag: want, depth: ind, liOpen: false };
+        stack.push(top);
+      }
+
+      const task = taskItem(content);
+      // Close the previous item at this level only. A deeper list opened while
+      // an item was still open becomes a child of that item, which is what
+      // keeps detail bullets under their day checkbox.
+      if (top.liOpen) { out.push("</li>"); top.liOpen = false; }
+      if (task) {
+        const box = task.slice(0, task.indexOf(">") + 1);
+        const rest = task.slice(task.indexOf(">") + 2);
+        out.push(`<li class="hw-md-task">${box} ${inline(escapeHtml(rest))}`);
+      } else {
+        out.push(`<li>${inline(escapeHtml(content))}`);
+      }
+      top.liOpen = true;
       continue;
     }
     closeList();

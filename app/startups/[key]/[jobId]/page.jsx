@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/lib/useApi";
 import { Avatar } from "@/components/Cards";
 import { ErrorState, KeyMissing, Loading } from "@/components/States";
+import Markdown from "@/components/Markdown";
+import ProofOfWork from "@/components/ProofOfWork";
+import Roadmap from "@/components/Roadmap";
 
 function Chips({ values, limit = 12, className = "hw-tag" }) {
   const list = (values || []).slice(0, limit);
@@ -106,6 +109,24 @@ function LinkRow({ label, value }) {
   );
 }
 
+// Only tabs that have saved material get content. The other two still render,
+// because "not generated yet" is the honest answer and hiding the tab would
+// leave no sign that roadmap and proof-of-work exist as concepts.
+const TABS = [
+  { id: "info", label: "Info" },
+  { id: "roadmap", label: "Roadmap", flag: "hasRoadmap" },
+  { id: "pow", label: "Proof of Work", flag: "hasProofOfWork" },
+];
+
+function Empty({ title, note }) {
+  return (
+    <div className="hw-raised-block hw-raised-block--tight">
+      <p className="hw-raised-label">{title}</p>
+      <p className="hw-person-bio">{note}</p>
+    </div>
+  );
+}
+
 export default function StartupJobDetail() {
   const params = useParams();
   const router = useRouter();
@@ -124,6 +145,17 @@ export default function StartupJobDetail() {
   const { data: startupData } = useApi(
     `/api/startups?key=${encodeURIComponent(startupKey)}`
   );
+
+  // Generated material lives on disk in Jobs/<jobId>/. Reading it costs no API
+  // quota, so the tabs render whatever was saved rather than anything derived
+  // from the live job document.
+  const { data: material } = useApi(
+    `/api/jobs/material?jobId=${encodeURIComponent(jobId)}`
+  );
+
+  const [tab, setTab] = useState("info");
+  const hasRoadmap = material?.hasRoadmap === true;
+  const hasProofOfWork = material?.hasProofOfWork === true;
 
   const purchased = data?.purchased === true;
   const needsKey = error?.code === "no_key";
@@ -244,48 +276,101 @@ export default function StartupJobDetail() {
         </div>
       </div>
 
-      <div className="hw-raised hw-role-body">
-        {job.description && (
-          <div className="hw-raised-block">
-            <p className="hw-raised-label">About the role</p>
-            <p className="hw-person-bio">{job.description}</p>
-          </div>
-        )}
-
-        <div className="hw-role-cols">
-          <Block title="Responsibilities" items={job.responsibilities} />
-          <Block title="Requirements" items={job.required_skills} />
-        </div>
-        <Block title="Perks" items={job.perks} />
-
-        {(attributes.location || attributes.employment_type) && (
-          <div className="hw-raised-block">
-            <p className="hw-raised-label">Details</p>
-            <div className="hw-links">
-              <MetaRow label="Location" value={attributes.location} />
-              <MetaRow
-                label="Employment type"
-                value={attributes.employment_type}
-              />
-            </div>
-          </div>
-        )}
-
-        {linkEntries.length > 0 && (
-          <div className="hw-raised-block">
-            <p className="hw-raised-label">Links</p>
-            <div className="hw-links">
-              {linkEntries.map(([k, v]) => (
-                <LinkRow
-                  key={k}
-                  label={LINK_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1)}
-                  value={v}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="hw-tabs" role="tablist">
+        {TABS.map((t) => {
+          const empty = t.id !== "info" && !material?.[t.flag];
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === t.id}
+              className={`hw-tab${tab === t.id ? " hw-tab--on" : ""}`}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+              {empty && <span className="hw-tab-flag">Not generated</span>}
+            </button>
+          );
+        })}
       </div>
+
+      {tab === "info" && (
+        <div className="hw-tab-panel">
+          <div className="hw-raised hw-role-body">
+            {job.description && (
+              <div className="hw-raised-block hw-raised-block--tight">
+                <p className="hw-raised-label">About the role</p>
+                <p className="hw-person-bio">{job.description}</p>
+              </div>
+            )}
+
+            <div className="hw-role-cols">
+              <Block title="Responsibilities" items={job.responsibilities} />
+              <Block title="Requirements" items={job.required_skills} />
+            </div>
+            <Block title="Perks" items={job.perks} />
+
+            {(attributes.location || attributes.employment_type) && (
+              <div className="hw-raised-block">
+                <p className="hw-raised-label">Details</p>
+                <div className="hw-links">
+                  <MetaRow label="Location" value={attributes.location} />
+                  <MetaRow
+                    label="Employment type"
+                    value={attributes.employment_type}
+                  />
+                </div>
+              </div>
+            )}
+
+            {linkEntries.length > 0 && (
+              <div className="hw-raised-block">
+                <p className="hw-raised-label">Links</p>
+                <div className="hw-links">
+                  {linkEntries.map(([k, v]) => (
+                    <LinkRow
+                      key={k}
+                      label={LINK_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1)}
+                      value={v}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === "roadmap" && (
+        <div className="hw-tab-panel">
+          <div className="hw-raised hw-role-body">
+            {material?.roadmap ? (
+              <Roadmap source={material.roadmap} />
+            ) : (
+              <Empty
+                title="Nothing here yet"
+                note="This role has no roadmap yet. Ask for one and it will show up here, day by day."
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === "pow" && (
+        <div className="hw-tab-panel">
+          <div className="hw-raised hw-role-body">
+            {material?.proofOfWork ? (
+              <ProofOfWork source={material.proofOfWork} />
+            ) : (
+              <Empty
+                title="Nothing here yet"
+                note="No project ideas for this role yet. Ask for some and they will show up here, ready to build."
+              />
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
