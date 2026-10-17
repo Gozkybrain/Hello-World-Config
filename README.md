@@ -58,11 +58,9 @@ The final file looks like this:
 
 ```env
 SGK=sgk_your_key_here
-# HW_API_BASE=https://helloworldjobs.net  # optional, defaults to public deployment
 ```
 
 - `SGK` (required) — Your Agent API Key from the Hello World setup page.
-- `HW_API_BASE` (optional) — Point at a different Hello World deployment. When set, the panel stops falling back to localhost, so you are never silently redirected to a different server.
 
 Restart `npm run dev` after editing, because the key is read once at startup.
 
@@ -70,7 +68,7 @@ Restart `npm run dev` after editing, because the key is read once at startup.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Start the local control panel on http://localhost:2026 (Turbopack). |
+| `npm run dev` | Start the local control panel on `http://localhost:2026` (Turbopack). |
 | `npm run build` | Build the app for production. |
 | `npm start` | Run the production build on port 2026. |
 
@@ -113,6 +111,5 @@ mkdir -p .opencode/skills && ln -s ../../skills/* .opencode/skills/
 
 Skills are still discoverable without any of this, because the agent reads `AGENTS.md` and follows it. The symlink only adds auto-discovery and `@` autocomplete.
 
-## Notes
-
-The Hello World Agent API (v1) this panel talks to is documented by the running app itself. This control panel is strictly local and exists to make that API usable with a visual interface and a live log, without deploying anything to the cloud.
+## Bonus
+For Developers, there is a public repo at [iBuild](https://github.com/Gozkybrain/iBuild) with skills for building quick React Apps. The repo is open source, you can recommend more Frontend and Backend skills.
